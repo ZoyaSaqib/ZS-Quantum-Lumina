@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZS Quantum Lumina - Next-Gen Photometric & Spectral Matrix</title>
+    <meta name="google-site-verification" content="QIN8Koh2zAqeKazhgi7zIq0or9r4uT219EUZFW0oHqU" />
+    <meta name="description" content="Official website and portfolio of Zoya Saqib.">
+    <link rel="canonical" href="https://zoyasaqib.netlify.app/" />
+    <style>
+        :root {
+            --bg-color: #020617;
+            --panel-bg: rgba(15, 23, 42, 0.75);
+            --primary-glow: #00f3ff;
+            --secondary-glow: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --text-color: #f8fafc;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 1.5rem 1rem;
+        }
+
+        /* Ambient Dynamic Background Aura */
+        .ambient-glow {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 243, 255, 0.05) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+            transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1050px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* Header Layout */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .logo-dot {
+            width: 14px;
+            height: 14px;
+            background: var(--primary-glow);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary-glow);
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 30%, var(--primary-glow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls-toolbar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.55rem 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn.active {
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--primary-glow);
+            color: var(--primary-glow);
+        }
+
+        /* Main Workspace Grid */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 850px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Camera Screen */
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--border-color);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            filter: contrast(1.05) brightness(1.02);
+            transition: filter 0.3s ease;
+        }
+
+        video.paused-feed {
+            filter: grayscale(80%) blur(2px);
+        }
+
+        canvas {
+            display: none;
+        }
+
+        /* Scanning Grid Overlay Effect */
+        .scanner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(0, 243, 255, 0) 50%, rgba(0, 243, 255, 0.04) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        /* Crosshair Target Guide */
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 1px dashed rgba(0, 243, 255, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotate-ring 10s linear infinite;
+        }
+        .crosshair::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--primary-glow);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        /* Histogram Canvas Bar Wrapper */
+        .histogram-box {
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+        }
+        #histCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Photometric Gauges & Data Panels */
+        .metric-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: rgba(248, 250, 252, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .main-score-box {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .light-percentage {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-glow);
+            text-shadow: 0 0 25px rgba(0, 243, 255, 0.3);
+            line-height: 1;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(0, 243, 255, 0.1);
+            color: var(--primary-glow);
+            border: 1px solid currentColor;
+        }
+
+        /* Progress Bar */
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary-glow), var(--primary-glow));
+            border-radius: 4px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        /* Laptop Ergonomics Status Box (NEW) */
+        .laptop-ergonomics-box {
+            background: rgba(0, 243, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .ergonomics-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(248, 250, 252, 0.5);
+            display: flex;
+            justify-content: space-between;
+        }
+        .ergonomics-status {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Advanced Spectrum Breakdown Matrix */
+        .spectrum-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .spectrum-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.65rem;
+            text-align: center;
+        }
+
+        .spectrum-label {
+            font-size: 0.7rem;
+            color: rgba(248, 250, 252, 0.5);
+            margin-bottom: 0.25rem;
+        }
+
+        .spectrum-val {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        /* Environmental Metrics Sub-grid */
+        .sub-metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .sub-metric-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.55rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .sub-metric-title {
+            font-size: 0.65rem;
+            color: rgba(248, 250, 252, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sub-metric-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* AI Recommendation Terminal text */
+        .terminal-box {
+            background: rgba(2, 6, 23, 0.7);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: rgba(248, 250, 252, 0.85);
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            line-height: 1.4;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        @keyframes rotate-ring {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow" id="ambientGlow"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-area">
+                <div class="logo-dot" id="logoDot"></div>
+                <h1>ZS Quantum Lumina v4.5 Pro - Laptop Ergonomics Suite</h1>
+            </div>
+            <div class="controls-toolbar">
+                <button class="btn" id="camSwitchBtn">Switch Cam</button>
+                <button class="btn" id="pauseBtn">Freeze Feed</button>
+                <button class="btn" id="exportBtn">Export Log</button>
+            </div>
+        </div>
+
+        <!-- Workspace Grid -->
+        <div class="workspace">
+            <!-- Left Column: Camera Feed & Histogram -->
+            <div class="panel">
+                <div class="metric-header">
+                    <span>Optical Sensor Matrix & Live Feed</span>
+                    <span id="fpsCounter">60 FPS</span>
+                </div>
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline muted></video>
+                    <canvas id="canvas"></canvas>
+                    <div class="scanner-overlay"></div>
+                    <div class="crosshair"></div>
+                </div>
+
+                <div class="metric-group">
+                    <div class="metric-header">Luminance Spectrum Histogram</div>
+                    <div class="histogram-box">
+                        <canvas id="histCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="terminal-box" id="terminalLog">
+                    System initialized. Telemetry pipelines online. Ready for environment analysis...
+                </div>
+            </div>
+
+            <!-- Right Column: Advanced Analytics Metrics -->
+            <div class="panel">
+                <div class="metric-group">
+                    <div class="metric-header">
+                        <span>Luminance Density Index</span>
+                        <span id="luxEst">0 Lux Equivalent</span>
+                    </div>
+                    <div class="main-score-box">
+                        <div class="light-percentage" id="lightPercentage">0%</div>
+                        <div class="status-badge" id="lightStatus">Calibrating</div>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- Laptop Usability Ergonomics Feature Box (NEW) -->
+                <div class="laptop-ergonomics-box" id="laptopBox">
+                    <div class="ergonomics-title">
+                        <span>Laptop Environment Compatibility Check</span>
+                        <span id="ergonomicsScore">--% Fit</span>
+                    </div>
+                    <div class="ergonomics-status" id="ergonomicsStatusText">
+                        Analyzing workspace for laptop screen usability...
+                    </div>
+                </div>
+
+                <!-- Environmental Details Box (Kelvin, Footcandles & Blue Light) -->
+                <div class="sub-metrics-grid">
+                    <div class="sub-metric-box">
+                        <span class="sub-metric-title">Color Temp</span>
+                        <span class="sub-metric-value" id="cctVal">-- K</span>
+                    </div>
+                    <div class="sub-metric-box">
+                        <span class="sub-metric-title">Illuminance</span>
+                        <span class="sub-metric-value" id="fcVal">-- FC</span>
+                    </div>
+                    <div class="sub-metric-box">
+                        <span class="sub-metric-title">Blue Hazard</span>
+                        <span class="sub-metric-value" id="blueHazardVal">--</span>
+                    </div>
+                </div>
+
+                <div class="metric-group">
+                    <div class="metric-header">RGB Spectral Decomposition Matrix</div>
+                    <div class="spectrum-grid">
+                        <div class="spectrum-card">
+                            <div class="spectrum-label">RED CH</div>
+                            <div class="spectrum-val" id="redVal">0%</div>
+                        </div>
+                        <div class="spectrum-card">
+                            <div class="spectrum-label">GREEN CH</div>
+                            <div class="spectrum-val" id="greenVal">0%</div>
+                        </div>
+                        <div class="spectrum-card">
+                            <div class="spectrum-label">BLUE CH</div>
+                            <div class="spectrum-val" id="blueVal">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-group">
+                    <div class="metric-header">Workspace Assessment & Actionable Advice</div>
+                    <div style="font-size: 0.82rem; color: rgba(248,250,252,0.75); line-height: 1.4;" id="recommendationText">
+                        Awaiting continuous environmental telemetry data stream...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const histCanvas = document.getElementById('histCanvas');
+        const histCtx = histCanvas.getContext('2d');
+
+        const lightPercentageEl = document.getElementById('lightPercentage');
+        const lightStatusEl = document.getElementById('lightStatus');
+        const progressFill = document.getElementById('progressFill');
+        const ambientGlow = document.getElementById('ambientGlow');
+        const logoDot = document.getElementById('logoDot');
+        const luxEst = document.getElementById('luxEst');
+        const cctVal = document.getElementById('cctVal');
+        const fcVal = document.getElementById('fcVal');
+        const blueHazardVal = document.getElementById('blueHazardVal');
+        
+        const redVal = document.getElementById('redVal');
+        const greenVal = document.getElementById('greenVal');
+        const blueVal = document.getElementById('blueVal');
+        
+        const terminalLog = document.getElementById('terminalLog');
+        const recommendationText = document.getElementById('recommendationText');
+        const ergonomicsScore = document.getElementById('ergonomicsScore');
+        const ergonomicsStatusText = document.getElementById('ergonomicsStatusText');
+        const laptopBox = document.getElementById('laptopBox');
+        
+        const camSwitchBtn = document.getElementById('camSwitchBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const fpsCounter = document.getElementById('fpsCounter');
+
+        let useFrontCamera = true;
+        let currentStream = null;
+        let isPaused = false;
+        
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+
+        async function startCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: { 
+                    facingMode: useFrontCamera ? 'user' : 'environment',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                }
+            };
+
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth || 320;
+                    canvas.height = video.videoHeight || 240;
+                    histCanvas.width = histCanvas.offsetWidth || 300;
+                    histCanvas.height = histCanvas.offsetHeight || 40;
+                    terminalLog.textContent = "Sensor stream locked. Active hardware matrix online.";
+                    requestAnimationFrame(analyzeFrame);
+                };
+            } catch (err) {
+                terminalLog.textContent = "CRITICAL ERROR: Camera hardware access denied.";
+                lightStatusEl.textContent = "Offline";
+                console.error("Camera error:", err);
+            }
+        }
+
+        camSwitchBtn.addEventListener('click', () => {
+            useFrontCamera = !useFrontCamera;
+            startCamera();
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            if (isPaused) {
+                video.classList.add('paused-feed');
+                pauseBtn.classList.add('active');
+                pauseBtn.innerHTML = 'Resume Feed';
+                terminalLog.textContent = "Stream frozen. Inspecting static telemetry frame buffer.";
+            } else {
+                video.classList.remove('paused-feed');
+                pauseBtn.classList.remove('active');
+                pauseBtn.innerHTML = 'Freeze Feed';
+                terminalLog.textContent = "Stream resumed. Live data collection active.";
+                requestAnimationFrame(analyzeFrame);
+            }
+        });
+
+        function estimateCCT(r, g, b) {
+            if (r === 0 && b === 0) return 4000;
+            let rbRatio = r / (b + 1);
+            let cct = Math.round(4000 + (1 - rbRatio) * 2500);
+            return Math.max(1800, Math.min(10000, cct));
+        }
+
+        function drawHistogram(data) {
+            let bins = new Array(256).fill(0);
+            let maxBin = 1;
+
+            for (let i = 0; i < data.length; i += 4) {
+                let brightness = Math.round(0.2126 * data[i] + 0.7152 * data[i+1] + 0.0722 * data[i+2]);
+                bins[brightness]++;
+                if (bins[brightness] > maxBin) maxBin = bins[brightness];
+            }
+
+            histCtx.clearRect(0, 0, histCanvas.width, histCanvas.height);
+            let barWidth = histCanvas.width / 256;
+
+            histCtx.fillStyle = 'rgba(0, 243, 255, 0.4)';
+            for (let i = 0; i < 256; i++) {
+                let barHeight = (bins[i] / maxBin) * histCanvas.height;
+                histCtx.fillRect(i * barWidth, histCanvas.height - barHeight, barWidth + 0.5, barHeight);
+            }
+        }
+
+        function analyzeFrame(timestamp) {
+            frameCount++;
+            if (timestamp - lastFpsUpdate >= 1000) {
+                fpsCounter.textContent = `${Math.round((frameCount * 1000) / (timestamp - lastFpsUpdate))} FPS`;
+                frameCount = 0;
+                lastFpsUpdate = timestamp;
+            }
+
+            if (!isPaused && video.readyState === video.HAVE_ENOUGH_DATA) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = frame.data;
+                
+                let totalR = 0, totalG = 0, totalB = 0;
+                let pixelCount = data.length / 4;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    totalR += data[i];
+                    totalG += data[i + 1];
+                    totalB += data[i + 2];
+                }
+
+                let avgR = totalR / pixelCount;
+                let avgG = totalG / pixelCount;
+                let avgB = totalB / pixelCount;
+
+                let avgBrightness = 0.2126 * avgR + 0.7152 * avgG + 0.0722 * avgB;
+                let percentage = Math.round((avgBrightness / 255) * 100);
+
+                let estimatedLux = Math.round((avgBrightness / 255) * 850);
+                let estimatedFC = (estimatedLux / 10.764).toFixed(1);
+                let estimatedCCT = estimateCCT(avgR, avgG, avgB);
+
+                lightPercentageEl.textContent = `${percentage}%`;
+                progressFill.style.width = `${percentage}%`;
+                luxEst.textContent = `${estimatedLux} Lux Est.`;
+                cctVal.textContent = `${estimatedCCT} K`;
+                fcVal.textContent = `${estimatedFC} FC`;
+
+                let rPct = Math.round((avgR/255)*100);
+                let gPct = Math.round((avgG/255)*100);
+                let bPct = Math.round((avgB/255)*100);
+
+                redVal.textContent = `${rPct}%`;
+                greenVal.textContent = `${gPct}%`;
+                blueVal.textContent = `${bPct}%`;
+
+                // Blue Light Hazard Calculation
+                let blueRatio = bPct / (rPct + gPct + 1);
+                if (blueRatio > 0.45) {
+                    blueHazardVal.textContent = "Elevated";
+                    blueHazardVal.style.color = "var(--accent-yellow)";
+                } else {
+                    blueHazardVal.textContent = "Normal";
+                    blueHazardVal.style.color = "var(--accent-green)";
+                }
+
+                drawHistogram(data);
+
+                // LAPTOP ERGONOMICS & USABILITY CHECK (Main Custom Feature)
+                // Ideal ambient light for laptop screen use is around 250 - 500 lux (approx 30% - 60% brightness index)
+                let laptopFitScore = 0;
+                if (estimatedLux < 80) {
+                    // Too dark -> causes high eye strain due to harsh screen contrast in dark room
+                    laptopFitScore = Math.max(10, Math.round((estimatedLux / 80) * 40));
+                    ergonomicsStatusText.innerHTML = `<span style="color:var(--accent-red)">❌ Unsuitable: Too dark! Causes high eye strain on laptop screens. Turn on room lighting.</span>`;
+                    laptopBox.style.borderColor = "var(--accent-red)";
+                } else if (estimatedLux >= 80 && estimatedLux <= 500) {
+                    // Perfect zone for laptop display work
+                    laptopFitScore = 95;
+                    ergonomicsStatusText.innerHTML = `<span style="color:var(--accent-green)">✔ Perfect! Ideal ambient lighting for comfortable laptop work & typing.</span>`;
+                    laptopBox.style.borderColor = "var(--accent-green)";
+                } else {
+                    // Too bright / Glare risk
+                    laptopFitScore = Math.max(30, 100 - Math.round(((estimatedLux - 500) / 350) * 60));
+                    ergonomicsStatusText.innerHTML = `<span style="color:var(--accent-yellow)">⚠️ Sub-optimal: Glare risk or excessive light washing out your laptop screen.</span>`;
+                    laptopBox.style.borderColor = "var(--accent-yellow)";
+                }
+                ergonomicsScore.textContent = `${laptopFitScore}% Fit`;
+
+                if (percentage < 20) {
+                    lightStatusEl.textContent = "Sub-Optimal (Dark)";
+                    lightStatusEl.style.color = "var(--accent-red)";
+                    logoDot.style.background = "var(--accent-red)";
+                    logoDot.style.boxShadow = "0 0 15px var(--accent-red)";
+                    progressFill.style.background = "linear-gradient(90deg, #7f1d1d, var(--accent-red))";
+                    ambientGlow.style.background = "radial-gradient(circle, rgba(239, 68, 68, 0.07) 0%, transparent 70%)";
+                    recommendationText.textContent = "Room environment is too dim for productivity. Working on a laptop here will accelerate eye fatigue.";
+                } else if (percentage >= 20 && percentage <= 65) {
+                    lightStatusEl.textContent = "Optimal Range";
+                    lightStatusEl.style.color = "var(--accent-green)";
+                    logoDot.style.background = "var(--accent-green)";
+                    logoDot.style.boxShadow = "0 0 15px var(--accent-green)";
+                    progressFill.style.background = "linear-gradient(90deg, #065f46, var(--accent-green))";
+                    ambientGlow.style.background = "radial-gradient(circle, rgba(16, 185, 129, 0.07) 0%, transparent 70%)";
+                    recommendationText.textContent = "Workspace lighting is balanced. Excellent conditions for long laptop sessions without screen glare.";
+                } else {
+                    lightStatusEl.textContent = "High Glare / Overexposed";
+                    lightStatusEl.style.color = "var(--accent-yellow)";
+                    logoDot.style.background = "var(--accent-yellow)";
+                    logoDot.style.boxShadow = "0 0 15px var(--accent-yellow)";
+                    progressFill.style.background = "linear-gradient(90deg, #78350f, var(--accent-yellow))";
+                    ambientGlow.style.background = "radial-gradient(circle, rgba(245, 158, 11, 0.07) 0%, transparent 70%)";
+                    recommendationText.textContent = "Direct light or window glare detected. Reposition your laptop or lower blinds to protect visibility.";
+                }
+            }
+
+            if (!isPaused) {
+                requestAnimationFrame(analyzeFrame);
+            }
+        }
+
+        exportBtn.addEventListener('click', () => {
+            terminalLog.textContent = `Telemetry Log Exported -> Lux: ${luxEst.textContent}, CCT: ${cctVal.textContent}, Fit Score: ${ergonomicsScore.textContent}`;
+            exportBtn.style.borderColor = "var(--primary-glow)";
+            exportBtn.style.color = "var(--primary-glow)";
+            setTimeout(() => { 
+                exportBtn.style.borderColor = "var(--border-color)"; 
+                exportBtn.style.color = "var(--text-color)";
+            }, 600);
+        });
+
+        startCamera();
+    </script>
+</body>
+</html>
